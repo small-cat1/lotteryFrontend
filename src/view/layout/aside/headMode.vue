@@ -63,7 +63,7 @@
   }
 
   watchEffect(() => {
-    if (route.name === 'gvaLayoutIframe') {
+    if (route.name === 'Iframe') {
       active.value = decodeURIComponent(route.query.url)
       return
     }
@@ -110,7 +110,7 @@
         window.open(index, '_blank')
         return
     }
-    if (index === 'gvaLayoutIframe') {
+    if (index === 'Iframe') {
       query.url = decodeURIComponent(index)
     }
     router.push({ name: index, query, params })

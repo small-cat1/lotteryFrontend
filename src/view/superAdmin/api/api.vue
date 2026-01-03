@@ -50,9 +50,6 @@
         </el-button>
         <el-button icon="Refresh" @click="onFresh"> 刷新缓存 </el-button>
         <el-button icon="Compass" @click="onSync"> 同步API </el-button>
-        <ExportTemplate template-id="api" />
-        <ExportExcel template-id="api" :limit="9999" />
-        <ImportExcel template-id="api" @on-success="getTableData" />
       </div>
       <el-table
         :data="tableData"
@@ -102,7 +99,12 @@
           </template>
         </el-table-column>
 
-        <el-table-column align="left" fixed="right" label="操作" :min-width="appStore.operateMinWith">
+        <el-table-column
+          align="left"
+          fixed="right"
+          label="操作"
+          :min-width="appStore.operateMinWith"
+        >
           <template #default="scope">
             <el-button
               icon="edit"
@@ -149,12 +151,12 @@
         <div class="flex justify-between items-center">
           <span class="text-lg">同步路由</span>
           <div>
-            <el-button :loading="apiCompletionLoading" @click="closeSyncDialog">
+            <el-button  @click="closeSyncDialog">
               取 消
             </el-button>
             <el-button
               type="primary"
-              :loading="syncing || apiCompletionLoading"
+              :loading="syncing"
               @click="enterSyncDialog"
             >
               确 定
@@ -168,15 +170,10 @@
         <span class="text-xs text-gray-500 mx-2 font-normal"
           >存在于当前路由中，但是不存在于api表</span
         >
-        <el-button type="primary" size="small" @click="apiCompletion">
-          <el-icon size="18">
-            <ai-gva />
-          </el-icon>
-          自动填充
-        </el-button>
+      
       </h4>
       <el-table
-        v-loading="syncing || apiCompletionLoading"
+        v-loading="syncing "
         element-loading-text="小淼正在思考..."
         :data="syncApiData.newApis"
       >
@@ -400,27 +397,23 @@
 
 <script setup>
   import {
-    getApiById,
-    getApiList,
     createApi,
-    updateApi,
     deleteApi,
     deleteApisByIds,
+    enterSyncApi,
     freshCasbin,
-    syncApi,
+    getApiById,
     getApiGroups,
+    getApiList,
     ignoreApi,
-    enterSyncApi
+    syncApi,
+    updateApi
   } from '@/api/api'
-  import { toSQLLine } from '@/utils/stringFun'
   import WarningBar from '@/components/warningBar/warningBar.vue'
-  import { ref } from 'vue'
+  import { useAppStore } from '@/pinia'
+  import { toSQLLine } from '@/utils/stringFun'
   import { ElMessage, ElMessageBox } from 'element-plus'
-  import ExportExcel from '@/components/exportExcel/exportExcel.vue'
-  import ExportTemplate from '@/components/exportExcel/exportTemplate.vue'
-  import ImportExcel from '@/components/exportExcel/importExcel.vue'
-  import { butler } from '@/api/autoCode'
-  import { useAppStore } from "@/pinia";
+  import { ref } from 'vue'
 
   defineOptions({
     name: 'Api'
@@ -678,6 +671,13 @@
     const res = await syncApi()
     if (res.code === 0) {
       res.data.newApis.forEach((item) => {
+        if (item.path.split('/')[1] === 'annual') {
+          item.apiGroup =
+            apiGroupMap.value[
+              item.path.split('/')[1] + '/' + item.path.split('/')[2]
+            ]
+          return
+        }
         item.apiGroup = apiGroupMap.value[item.path.split('/')[1]]
       })
 
@@ -793,36 +793,7 @@
       }
     })
   }
-  const apiCompletionLoading = ref(false)
-  const apiCompletion = async () => {
-    apiCompletionLoading.value = true
-    const routerPaths = syncApiData.value.newApis
-      .filter((item) => !item.apiGroup || !item.description)
-      .map((item) => item.path)
-    const res = await butler({ data: routerPaths, command: 'apiCompletion' })
-    apiCompletionLoading.value = false
-    if (res.code === 0) {
-      try {
-        const data = JSON.parse(res.data)
-        syncApiData.value.newApis.forEach((item) => {
-          const target = data.find((d) => d.path === item.path)
-          if (target) {
-            if (!item.apiGroup) {
-              item.apiGroup = target.apiGroup
-            }
-            if (!item.description) {
-              item.description = target.description
-            }
-          }
-        })
-      } catch (_) {
-        ElMessage({
-          type: 'error',
-          message: 'AI自动填充失败,请重新生成'
-        })
-      }
-    }
-  }
+
 </script>
 
 <style scoped lang="scss">

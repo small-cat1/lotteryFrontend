@@ -1,19 +1,20 @@
-import GvaBanner from './banner.vue'
 import GvaCard from './card.vue'
-import GvaChart from './charts.vue'
-import GvaTable from './table.vue'
-import GvaNotice from './notice.vue'
-import GvaQuickLink from './quickLinks.vue'
-import GvaWiki from './wiki.vue'
-import GvaPluginTable from './pluginTable.vue'
+import StatCard from './stat-card.vue'
+import CheckInChart from './check-in-chart.vue'
+import PrizeChart from './prize-chart.vue'
+import WinnerTable from './winner-table.vue'
+import WordCloud from './word-cloud.vue'
+import DanmakuList from './danmaku-list.vue'
+import ShakeRanking from './shake-ranking.vue'
 
 export {
-  GvaBanner,
   GvaCard,
-  GvaChart,
-  GvaTable,
-  GvaNotice,
-  GvaQuickLink,
-  GvaWiki,
-  GvaPluginTable
+  StatCard,
+  CheckInChart,
+  PrizeChart,
+  WinnerTable,
+  WordCloud,
+  QuickLinks,
+  DanmakuList,
+  ShakeRanking
 }

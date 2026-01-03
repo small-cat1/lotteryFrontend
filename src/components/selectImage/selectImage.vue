@@ -66,7 +66,6 @@
             <el-button @click="useSelectedImages" type="danger" :disabled="selectedImages.length === 0" :icon="ArrowLeftBold">选定</el-button>
             <upload-common :image-common="imageCommon" :classId="search.classId" @on-success="onSuccess" />
             <cropper-image :classId="search.classId" @on-success="onSuccess" />
-            <QRCodeUpload :classId="search.classId" @on-success="onSuccess" />
             <upload-image :image-url="imageUrl" :file-size="2048" :max-w-h="1080" :classId="search.classId" @on-success="onSuccess" />
           </div>
           <div class="flex flex-wrap gap-4">
