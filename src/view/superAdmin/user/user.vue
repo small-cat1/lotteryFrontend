@@ -30,11 +30,7 @@
         >
       </div>
       <el-table :data="tableData" row-key="ID">
-        <el-table-column align="left" label="头像" min-width="75">
-          <template #default="scope">
-            <CustomPic style="margin-top: 8px" :pic-src="scope.row.headerImg" />
-          </template>
-        </el-table-column>
+    
         <el-table-column align="left" label="ID" min-width="50" prop="ID" />
         <el-table-column
           align="left"
@@ -244,9 +240,6 @@
             :inactive-value="2"
           />
         </el-form-item>
-        <el-form-item label="头像" label-width="80px">
-          <SelectImage v-model="userInfo.headerImg" />
-        </el-form-item>
       </el-form>
     </el-drawer>
   </div>
@@ -267,7 +260,6 @@
 
   import { nextTick, ref, watch } from 'vue'
   import { ElMessage, ElMessageBox } from 'element-plus'
-  import SelectImage from '@/components/selectImage/selectImage.vue'
   import { useAppStore } from "@/pinia";
 
   defineOptions({

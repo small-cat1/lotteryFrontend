@@ -10,14 +10,6 @@
       <!-- 个人信息区 -->
       <div class="px-8 -mt-20 pb-8">
         <div class="flex flex-col lg:flex-row items-start gap-8">
-          <!-- 左侧头像 -->
-          <div class="profile-avatar-wrapper flex-shrink-0 mx-auto lg:mx-0">
-            <SelectImage
-                v-model="userStore.userInfo.headerImg"
-                file-type="image"
-                rounded
-            />
-          </div>
 
           <!-- 右侧信息 -->
           <div class="flex-1 pt-12 lg:pt-20 w-full">
@@ -251,7 +243,6 @@
   import { reactive, ref, watch } from 'vue'
   import { ElMessage } from 'element-plus'
   import { useUserStore } from '@/pinia/modules/user'
-  import SelectImage from '@/components/selectImage/selectImage.vue'
   defineOptions({
     name: 'Person'
   })

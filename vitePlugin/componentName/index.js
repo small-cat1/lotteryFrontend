@@ -1,6 +1,6 @@
+import chokidar from 'chokidar'
 import fs from 'fs'
 import path from 'path'
-import chokidar from 'chokidar'
 
 const toPascalCase = (str) => {
   return str.replace(/(^\w|-\w)/g, clearAndUpper)
@@ -36,9 +36,12 @@ const vueFilePathPlugin = (outputFilePath) => {
   let root
 
   const generatePathNameMap = () => {
+    const viewPath = path.join(root, 'src/view')
+    const pluginPath = path.join(root, 'src/plugin')
+
     const vueFiles = [
-      ...getAllVueFiles(path.join(root, 'src/view')),
-      ...getAllVueFiles(path.join(root, 'src/plugin'))
+      ...(fs.existsSync(viewPath) ? getAllVueFiles(viewPath) : []),
+      ...(fs.existsSync(pluginPath) ? getAllVueFiles(pluginPath) : [])
     ]
     const pathNameMap = vueFiles.reduce((acc, filePath) => {
       const content = fs.readFileSync(filePath, 'utf-8')
@@ -53,9 +56,12 @@ const vueFilePathPlugin = (outputFilePath) => {
   }
 
   const watchDirectoryChanges = () => {
+    const viewPath = path.join(root, 'src/view')
+    const pluginPath = path.join(root, 'src/plugin')
+
     const watchDirectories = [
-      path.join(root, 'src/view'),
-      path.join(root, 'src/plugin')
+      ...(fs.existsSync(viewPath) ? [viewPath] : []),
+      ...(fs.existsSync(pluginPath) ? [pluginPath] : [])
     ]
     const watcher = chokidar.watch(watchDirectories, {
       persistent: true,
