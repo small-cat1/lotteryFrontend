@@ -65,6 +65,28 @@
           width="100"
           align="center"
         />
+        <el-table-column label="场次密码" width="180" align="center">
+          <template #default="scope">
+            <div class="password-cell">
+              <span>{{
+                visiblePasswords[scope.row.ID] ? scope.row.password : '******'
+              }}</span>
+              <el-button
+                type="primary"
+                link
+                :icon="visiblePasswords[scope.row.ID] ? 'Hide' : 'View'"
+                @click="togglePassword(scope.row.ID)"
+              />
+              <el-button
+                v-if="visiblePasswords[scope.row.ID]"
+                type="success"
+                link
+                icon="CopyDocument"
+                @click="copyPassword(scope.row.password)"
+              />
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column label="状态" width="100" align="center">
           <template #default="scope">
             <el-tag :type="statusTagType(scope.row.status)" size="small">
@@ -307,7 +329,19 @@
       { required: true, message: '请输入获奖人数', trigger: 'blur' }
     ]
   }
+  // 密码显示状态
+  const visiblePasswords = ref({})
 
+  // 切换密码显示/隐藏
+  const togglePassword = (id) => {
+    visiblePasswords.value[id] = !visiblePasswords.value[id]
+  }
+
+  // 复制密码
+  const copyPassword = (password) => {
+    navigator.clipboard.writeText(password)
+    ElMessage.success('密码已复制')
+  }
   // 排行榜
   const scoresVisible = ref(false)
   const scoresList = ref([])
@@ -515,5 +549,11 @@
   .form-tip {
     margin-left: 10px;
     color: #909399;
+  }
+  .password-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
   }
 </style>

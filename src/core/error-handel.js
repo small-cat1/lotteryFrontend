@@ -1,4 +1,3 @@
-import { createSysError } from '@/api/system/sysError'
 
 function sendErrorTip(errorInfo) {
   setTimeout(() => {
@@ -8,10 +7,8 @@ function sendErrorTip(errorInfo) {
       level: 'error',
       solution: null
     }
+    console
     
-    createSysError(errorData).catch(apiErr => {
-      console.error('Failed to create error record:', apiErr)
-    })
   }, 0)
 }
   
