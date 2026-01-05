@@ -17,6 +17,33 @@ export const getCheckInStats = (activityId) => {
   })
 }
 
+// 更新签到信息
+export const updateCheckIn = (data) => {
+  return service({
+    url: '/annual/checkIn',
+    method: 'put',
+    data
+  })
+}
+
+// 更新签到状态（审核通过/拒绝）
+export const updateCheckInStatus = (data) => {
+  return service({
+    url: '/annual/checkIn/status',
+    method: 'put',
+    data
+  })
+}
+
+// 删除签到
+export const deleteCheckIn = (data) => {
+  return service({
+    url: '/annual/checkIn',
+    method: 'delete',
+    data
+  })
+}
+
 // 导出签到
 export const exportCheckIn = (params) => {
   return service({
