@@ -66,7 +66,7 @@
         </el-table-column>
         <el-table-column label="弹幕内容" prop="content" min-width="200">
           <template #default="scope">
-            <span :style="{ color: scope.row.color }">{{ scope.row.content }}</span>
+            <span >{{ scope.row.content }}</span>
           </template>
         </el-table-column>
         <el-table-column label="颜色" width="100" align="center">
