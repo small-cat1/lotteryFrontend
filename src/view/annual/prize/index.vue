@@ -48,7 +48,7 @@
           <template #default="scope">
             <el-image 
               v-if="scope.row.image" 
-              :src="scope.row.image" 
+              :src="getUrl(scope.row.image)" 
               style="width: 60px; height: 60px" 
               fit="cover"
               :preview-src-list="[scope.row.image]"
