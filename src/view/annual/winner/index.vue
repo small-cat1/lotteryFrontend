@@ -254,6 +254,97 @@
         </div>
       </div>
     </el-dialog>
+
+    <!-- ✅ 新增：核销领奖对话框 -->
+    <el-dialog
+      v-model="verifyVisible"
+      title="核销领奖"
+      width="500px"
+      :close-on-click-modal="false"
+      @closed="resetVerifyForm"
+    >
+      <!-- 中奖信息展示 -->
+      <div class="verify-winner-info" v-if="currentWinner">
+        <div class="info-row">
+          <span class="label">中奖用户：</span>
+          <div class="user-info">
+            <el-avatar :src="currentWinner.user?.avatar" :size="32" />
+            <span>{{ currentWinner.user?.nickname || '-' }}</span>
+            <span class="text-muted"
+              >({{ currentWinner.user?.realName || '-' }})</span
+            >
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="label">中奖奖品：</span>
+          <div class="prize-info">
+            <el-image
+              v-if="currentWinner.prize?.image"
+              :src="getUrl(currentWinner.prize.image)"
+              style="width: 32px; height: 32px"
+              fit="cover"
+            />
+            <span>{{ currentWinner.prize?.name || '-' }}</span>
+            <el-tag
+              :type="levelTagType(currentWinner.prize?.level)"
+              size="small"
+            >
+              {{ levelText(currentWinner.prize?.level) }}
+            </el-tag>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="label">中奖时间：</span>
+          <span>{{ formatDate(currentWinner.createdAt) }}</span>
+        </div>
+      </div>
+
+      <el-divider />
+
+      <!-- 核销码输入表单 -->
+      <el-form
+        ref="verifyFormRef"
+        :model="verifyForm"
+        :rules="verifyRules"
+        label-width="100px"
+      >
+        <el-form-item label="核销码" prop="verifyCode">
+          <el-input
+            v-model="verifyForm.verifyCode"
+            placeholder="请输入领奖核销码"
+            clearable
+            maxlength="20"
+            show-word-limit
+            @keyup.enter="submitVerify"
+          >
+            <template #prefix>
+              <el-icon><Key /></el-icon>
+            </template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="备注" prop="remark">
+          <el-input
+            v-model="verifyForm.remark"
+            type="textarea"
+            placeholder="可选填写备注信息"
+            :rows="2"
+            maxlength="200"
+            show-word-limit
+          />
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <el-button @click="verifyVisible = false">取消</el-button>
+        <el-button
+          type="primary"
+          :loading="verifyLoading"
+          @click="submitVerify"
+        >
+          确认核销
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -269,6 +360,7 @@
   } from '@/api/annual/winner'
   import { formatDate } from '@/utils/format'
   import { getUrl } from '@/utils/image'
+  import { Key } from '@element-plus/icons-vue'
   import { ElMessage, ElMessageBox } from 'element-plus'
   import { onMounted, reactive, ref } from 'vue'
 
@@ -307,6 +399,22 @@
   // 抽奖结果
   const resultVisible = ref(false)
   const drawResult = ref([])
+
+  // ✅ 新增：核销相关状态
+  const verifyVisible = ref(false)
+  const verifyLoading = ref(false)
+  const verifyFormRef = ref(null)
+  const currentWinner = ref(null)
+  const verifyForm = reactive({
+    verifyCode: '',
+    remark: ''
+  })
+  const verifyRules = {
+    verifyCode: [
+      { required: true, message: '请输入核销码', trigger: 'blur' },
+      { min: 4, max: 20, message: '核销码长度为 4-20 位', trigger: 'blur' }
+    ]
+  }
 
   // 等级
   const levelText = (level) => {
@@ -431,16 +539,45 @@
     }
   }
 
-  // 确认领奖
-  const handleReceive = async (row) => {
-    await ElMessageBox.confirm('确定该用户已领取奖品吗？', '提示', {
-      type: 'warning'
-    })
+  // ✅ 修改：打开核销对话框
+  const handleReceive = (row) => {
+    currentWinner.value = row
+    verifyVisible.value = true
+  }
 
-    const res = await confirmReceive({ id: row.id })
-    if (res.code === 0) {
-      ElMessage.success('确认成功')
-      getTableData()
+  // ✅ 新增：重置核销表单
+  const resetVerifyForm = () => {
+    verifyFormRef.value?.resetFields()
+    Object.assign(verifyForm, {
+      verifyCode: '',
+      remark: ''
+    })
+    currentWinner.value = null
+  }
+
+  // ✅ 新增：提交核销
+  const submitVerify = async () => {
+    await verifyFormRef.value.validate()
+
+    verifyLoading.value = true
+    try {
+      const res = await confirmReceive({
+        id: currentWinner.value.id,
+        verifyCode: verifyForm.verifyCode,
+        remark: verifyForm.remark
+      })
+      if (res.code === 0) {
+        ElMessage.success('核销成功，奖品已领取')
+        verifyVisible.value = false
+        getTableData()
+      } else {
+        // 后端返回错误信息
+        ElMessage.error(res.msg || '核销失败，请检查核销码是否正确')
+      }
+    } catch (error) {
+      ElMessage.error('核销失败，请稍后重试')
+    } finally {
+      verifyLoading.value = false
     }
   }
 
@@ -516,5 +653,32 @@
     color: #909399;
     font-size: 13px;
     margin-top: 4px;
+  }
+
+  /* ✅ 新增：核销对话框样式 */
+  .verify-winner-info {
+    background: #f5f7fa;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .verify-winner-info .info-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .verify-winner-info .info-row:last-child {
+    margin-bottom: 0;
+  }
+  .verify-winner-info .label {
+    width: 80px;
+    color: #606266;
+    flex-shrink: 0;
+  }
+  .verify-winner-info .user-info,
+  .verify-winner-info .prize-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 </style>
