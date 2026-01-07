@@ -331,7 +331,7 @@
 
   // 基础地址配置
   const BASE_URL = 'https://h5.app88.shop'
-
+  const ACTIVE_URL = 'https://console.app88.shop'
   const userStore = useUserStore()
   const token = computed(() => userStore.token)
 
@@ -385,7 +385,7 @@
 
   // 生成大屏幕地址
   const getScreenUrl = (activityId) => {
-    return `${BASE_URL}/screen?activityId=${activityId}`
+    return `${ACTIVE_URL}/screen?activityId=${activityId}`
   }
 
   // 生成用户参与地址
