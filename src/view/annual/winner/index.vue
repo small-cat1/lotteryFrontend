@@ -58,7 +58,7 @@
             <div class="prize-info">
               <el-image 
                 v-if="scope.row.prize?.image" 
-                :src="scope.row.prize.image" 
+                :src="getUrl(scope.row.prize.image)" 
                 style="width: 40px; height: 40px" 
                 fit="cover" 
               />
@@ -176,8 +176,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { getWinnerList, confirmReceive, deleteWinner, exportWinner, randomDraw } from '@/api/annual/winner'
 import { getActivityList } from '@/api/annual/activity'
 import { getPrizeList } from '@/api/annual/prize'
-import { formatDate } from '@/utils/format'
-
+import { getUrl,formatDate } from '@/utils/format'
 // 活动和奖品列表
 const activityList = ref([])
 const prizeList = ref([])
