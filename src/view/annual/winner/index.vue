@@ -92,6 +92,40 @@
             {{ winTypeText(scope.row.winType) }}
           </template>
         </el-table-column>
+
+        <!-- ✅ 新增：场次列 -->
+        <el-table-column label="场次" width="120" align="center">
+          <template #default="scope">
+            <span v-if="scope.row.winType === 1 && scope.row.round">
+              {{ scope.row.round.name || `第${scope.row.round.roundNumber}场` }}
+            </span>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+
+        <!-- ✅ 新增：摇晃次数列 -->
+        <el-table-column label="摇晃次数" width="100" align="center">
+          <template #default="scope">
+            <span v-if="scope.row.winType === 1">
+              {{ scope.row.score }} 次
+            </span>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+
+        <!-- ✅ 新增：排名列 -->
+        <el-table-column label="排名" width="80" align="center">
+          <template #default="scope">
+            <template v-if="scope.row.winType === 1">
+              <span v-if="scope.row.rank === 1">🥇</span>
+              <span v-else-if="scope.row.rank === 2">🥈</span>
+              <span v-else-if="scope.row.rank === 3">🥉</span>
+              <span v-else>{{ scope.row.rank }}</span>
+            </template>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+
         <el-table-column label="领奖状态" width="100" align="center">
           <template #default="scope">
             <el-tag
