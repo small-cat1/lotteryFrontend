@@ -50,6 +50,63 @@
             <div>至 {{ formatDate(scope.row.endTime) }}</div>
           </template>
         </el-table-column>
+        
+        <!-- 大屏幕地址 -->
+        <el-table-column label="大屏幕地址" min-width="200">
+          <template #default="scope">
+            <div class="link-cell">
+              <el-link 
+                type="primary" 
+                :href="getScreenUrl(scope.row.ID)" 
+                target="_blank"
+                :underline="false"
+              >
+                打开大屏幕
+              </el-link>
+              <el-button 
+                type="primary" 
+                link 
+                icon="CopyDocument"
+                @click="copyLink(getScreenUrl(scope.row.ID), '大屏幕地址')"
+              >
+                复制
+              </el-button>
+            </div>
+          </template>
+        </el-table-column>
+        
+        <!-- 用户参与地址 -->
+        <el-table-column label="用户参与地址" min-width="200">
+          <template #default="scope">
+            <div class="link-cell">
+              <el-link 
+                type="success" 
+                :href="getEntryUrl(scope.row.ID)" 
+                target="_blank"
+                :underline="false"
+              >
+                打开页面
+              </el-link>
+              <el-button 
+                type="primary" 
+                link 
+                icon="CopyDocument"
+                @click="copyLink(getEntryUrl(scope.row.ID), '参与地址')"
+              >
+                复制
+              </el-button>
+              <el-button 
+                type="success" 
+                link
+                @click="showQrcode(scope.row)"
+              >
+                <el-icon><Iphone /></el-icon>
+                二维码
+              </el-button>
+            </div>
+          </template>
+        </el-table-column>
+        
         <el-table-column label="签到" width="80" align="center">
           <template #default="scope">
             <el-tag
@@ -225,6 +282,30 @@
         <el-button type="primary" @click="handleSubmit">确定</el-button>
       </template>
     </el-dialog>
+
+    <!-- 二维码弹窗 -->
+    <el-dialog
+      v-model="qrcodeVisible"
+      title="扫码参与活动"
+      width="400px"
+      align-center
+    >
+      <div class="qrcode-dialog">
+        <h3 class="activity-title">{{ currentActivity?.title }}</h3>
+        <div class="qrcode-wrap">
+          <qrcode-vue :value="currentQrcodeUrl" :size="200" level="H" />
+        </div>
+        <p class="qrcode-url">{{ currentQrcodeUrl }}</p>
+        <el-button type="primary" @click="copyLink(currentQrcodeUrl, '参与地址')">
+          <el-icon><CopyDocument /></el-icon>
+          复制链接
+        </el-button>
+        <el-button @click="downloadQrcode">
+          <el-icon><Download /></el-icon>
+          下载二维码
+        </el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -240,10 +321,17 @@
   import { formatDate } from '@/utils/format'
   import { ElMessage, ElMessageBox } from 'element-plus'
   import { computed, reactive, ref } from 'vue'
-import { getUrl, isVideoExt } from '@/utils/image'
+  import { getUrl } from '@/utils/image'
+  import { Iphone, CopyDocument, Download } from '@element-plus/icons-vue'
+  import QrcodeVue from 'qrcode.vue'
+
   defineOptions({
     name: 'ActivityManager'
   })
+
+  // 基础地址配置
+  const BASE_URL = 'https://h5.app88.shop'
+
   const userStore = useUserStore()
   const token = computed(() => userStore.token)
 
@@ -285,6 +373,58 @@ import { getUrl, isVideoExt } from '@/utils/image'
     timeRange: [
       { required: true, message: '请选择活动时间', trigger: 'change' }
     ]
+  }
+
+  // 二维码弹窗
+  const qrcodeVisible = ref(false)
+  const currentActivity = ref(null)
+  const currentQrcodeUrl = computed(() => {
+    if (!currentActivity.value) return ''
+    return getEntryUrl(currentActivity.value.ID)
+  })
+
+  // 生成大屏幕地址
+  const getScreenUrl = (activityId) => {
+    return `${BASE_URL}/screen?activityId=${activityId}`
+  }
+
+  // 生成用户参与地址
+  const getEntryUrl = (activityId) => {
+    return `${BASE_URL}/entry?activityId=${activityId}`
+  }
+
+  // 复制链接
+  const copyLink = async (url, name) => {
+    try {
+      await navigator.clipboard.writeText(url)
+      ElMessage.success(`${name}已复制到剪贴板`)
+    } catch (err) {
+      // 降级方案
+      const input = document.createElement('input')
+      input.value = url
+      document.body.appendChild(input)
+      input.select()
+      document.execCommand('copy')
+      document.body.removeChild(input)
+      ElMessage.success(`${name}已复制到剪贴板`)
+    }
+  }
+
+  // 显示二维码弹窗
+  const showQrcode = (row) => {
+    currentActivity.value = row
+    qrcodeVisible.value = true
+  }
+
+  // 下载二维码
+  const downloadQrcode = () => {
+    const canvas = document.querySelector('.qrcode-wrap canvas')
+    if (!canvas) return
+    
+    const link = document.createElement('a')
+    link.download = `${currentActivity.value?.title || '活动'}-二维码.png`
+    link.href = canvas.toDataURL('image/png')
+    link.click()
   }
 
   // 获取列表
@@ -450,5 +590,40 @@ import { getUrl, isVideoExt } from '@/utils/image'
   .avatar-uploader-icon {
     font-size: 28px;
     color: #8c939d;
+  }
+
+  /* 链接单元格样式 */
+  .link-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  /* 二维码弹窗样式 */
+  .qrcode-dialog {
+    text-align: center;
+    padding: 20px 0;
+  }
+  .qrcode-dialog .activity-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  .qrcode-dialog .qrcode-wrap {
+    display: inline-flex;
+    padding: 16px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 16px;
+  }
+  .qrcode-dialog .qrcode-url {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 20px;
+    word-break: break-all;
+    padding: 0 20px;
   }
 </style>
