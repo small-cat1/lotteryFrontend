@@ -385,7 +385,7 @@
 
   // 生成大屏幕地址
   const getScreenUrl = (activityId) => {
-    return `${ACTIVE_URL}/screen?activityId=${activityId}`
+    return `${ACTIVE_URL}/dashboard?activityId=${activityId}`
   }
 
   // 生成用户参与地址
