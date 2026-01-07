@@ -97,7 +97,10 @@
         <el-table-column label="场次" width="120" align="center">
           <template #default="scope">
             <span v-if="scope.row.winType === 1 && scope.row.round">
-              {{ scope.row.round.name || `第${scope.row.round.roundNumber}场` }}
+              {{
+                scope.row.round.roundName ||
+                `第${scope.row.round.roundNumber}场`
+              }}
             </span>
             <span v-else>-</span>
           </template>
